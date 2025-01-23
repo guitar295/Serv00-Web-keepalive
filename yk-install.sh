@@ -11,7 +11,7 @@ DOMAIN_FOLDER_ROOT="/home/$USERNAME/domains"
 DOMAIN_DIR="$DOMAIN_FOLDER_ROOT/$DOMAIN"
 PUBLIC_NODEJS_DIR="$DOMAIN_DIR/public_nodejs"
 APP_JS_PATH="$PUBLIC_NODEJS_DIR/app.js"
-APP_JS_URL="https://raw.githubusercontent.com/guitar295/Serv00-Web-keepalive/refs/heads/main/app.js"
+APP_JS_URL="https://raw.githubusercontent.com/guitar295/Serv00-Web-keepalive/refs/heads/main/yk-app.js"
 
 echo " ———————————————————————————————————————————————————————————— "
 
