@@ -1,28 +1,37 @@
 require('dotenv').config();
 const express = require("express");
 const { exec } = require('child_process');
-const path = require('path'); // 添加 path 模块
+const fs = require('fs'); // 添加 fs 模块以操作文件
+const path = require('path');
 const app = express();
 app.use(express.json());
 
-// 存储最多5条日志
+// 获取当前用户名 (使用 `whoami` 命令)
+const USERNAME = require('child_process').execSync('whoami').toString().trim();
+
+// 最多存储5条日志
 let logs = [];
-// 存储最近的 start.sh 成功信息
+// 存储最近一次 start.sh 成功的信息
 let latestStartLog = "";
 
 // 日志记录函数
 function logMessage(message) {
-    // 将新的日志加入数组
+    // 添加新日志到数组
     logs.push(message);
-    // 保持数组最多包含5个元素
+    // 保证数组最多包含5个元素
     if (logs.length > 5) {
         logs.shift();
     }
+
+    // 将日志内容写入 error.log 文件
+    const logContent = logs.join("\n");
+    const logFilePath = `${process.env.HOME}/domains/${USERNAME}.serv00.net/logs/error.log`;
+    fs.writeFileSync(logFilePath, logContent, 'utf8'); // 覆盖写入文件
 }
 
-// 执行通用的 shell 命令函数
+// 执行通用 shell 命令的函数
 function executeCommand(commandToRun, actionName, isStartLog = false) {
-    const currentDate = new Date(); // 每次调用时更新时间
+    const currentDate = new Date(); // 每次调用时更新日期时间
     const formattedDate = currentDate.toLocaleDateString();
     const formattedTime = currentDate.toLocaleTimeString();
 
@@ -53,7 +62,7 @@ function runShellCommand() {
     executeCommand(commandToRun, "start.sh", true); // 标记为来自 start.sh 的日志
 }
 
-// KeepAlive 函数，执行 keepalive.sh
+// KeepAlive 函数，用于执行 keepalive.sh
 function KeepAlive() {
     const commandToRun = `bash ${process.env.HOME}/serv00-play/keepalive.sh`;
     executeCommand(commandToRun, "keepalive.sh");
@@ -66,12 +75,12 @@ setInterval(KeepAlive, 20000); // 20000ms = 20秒
 app.get("/info", function (req, res) {
     runShellCommand(); // 直接调用 bash start.sh 命令
     KeepAlive();       // 直接调用 bash keepalive.sh 命令
-    res.type("html").send("<pre> Serv00 和 KeepAlive 已复活成功！</pre>");
+    res.type("html").send("<pre> Serv00 和 KeepAlive 已成功恢复！</pre>");
 });
 
 // API endpoint /node_info 显示 start.sh 的日志
 app.get("/node_info", function (req, res) {
-    // 显示最近的 start.sh 执行日志
+    // 显示最近一次 start.sh 执行日志
     res.type("html").send("<pre>" + latestStartLog + "</pre>");
 });
 
