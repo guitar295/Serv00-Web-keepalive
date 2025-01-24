@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require("express");
 const { exec } = require('child_process');
-const fs = require('fs'); // 添加 fs 模块以操作文件
+const fs = require('fs');
 const path = require('path');
 const app = express();
 app.use(express.json());
@@ -31,7 +31,7 @@ function logMessage(message) {
 
 // 执行通用 shell 命令的函数
 function executeCommand(commandToRun, actionName, isStartLog = false) {
-    const currentDate = new Date(); // 每次调用时更新日期时间
+    const currentDate = new Date();
     const formattedDate = currentDate.toLocaleDateString();
     const formattedTime = currentDate.toLocaleTimeString();
 
@@ -58,7 +58,11 @@ function executeCommand(commandToRun, actionName, isStartLog = false) {
 
 // 执行 start.sh 的 shell 命令函数
 function runShellCommand() {
-    const commandToRun = `cd ${process.env.HOME}/serv00-play/singbox/ && bash start.sh`;
+    const commandToRun = `
+        if ! ps aux | grep '[s]erv00sb' > /dev/null || ! ps aux | grep '[c]loudflared' > /dev/null; then
+            cd ${process.env.HOME}/serv00-play/singbox/ && bash start.sh
+        fi
+    `;
     executeCommand(commandToRun, "start.sh", true); // 标记为来自 start.sh 的日志
 }
 
