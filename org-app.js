@@ -1,32 +1,37 @@
 require('dotenv').config();
 const express = require("express");
 const { exec } = require('child_process');
-const fs = require('fs'); // Import module fs
+const fs = require('fs'); // 添加 fs 模块以操作文件
+const path = require('path');
 const app = express();
 app.use(express.json());
 
-// Mảng lưu trữ tối đa 5 kết quả log
+// 获取当前用户名 (使用 `whoami` 命令)
+const USERNAME = require('child_process').execSync('whoami').toString().trim();
+
+// 最多存储5条日志
 let logs = [];
-// Biến lưu kết quả successMsg gần nhất của lệnh start.sh
+// 存储最近一次 start.sh 成功的信息
 let latestStartLog = "";
 
+// 日志记录函数
 function logMessage(message) {
-    // Thêm log mới vào mảng
+    // 添加新日志到数组
     logs.push(message);
-    // Giữ mảng chỉ chứa tối đa 5 phần tử
+    // 保证数组最多包含5个元素
     if (logs.length > 5) {
         logs.shift();
     }
 
-    // Ghi nội dung vào tệp error.log
+    // 将日志内容写入 error.log 文件
     const logContent = logs.join("\n");
-    const logFilePath = '/home/hoangminhhmp/domains/hoangminhhmp.serv00.net/logs/error.log';
-    fs.writeFileSync(logFilePath, logContent, 'utf8'); // Ghi đè vào tệp
+    const logFilePath = `${process.env.HOME}/domains/${USERNAME}.serv00.net/logs/error.log`;
+    fs.writeFileSync(logFilePath, logContent, 'utf8'); // 覆盖写入文件
 }
 
-// Hàm thực thi lệnh shell chung
+// 执行通用 shell 命令的函数
 function executeCommand(commandToRun, actionName, isStartLog = false) {
-    const currentDate = new Date(); // Cập nhật thời gian tại mỗi lần gọi
+    const currentDate = new Date(); // 每次调用时更新日期时间
     const formattedDate = currentDate.toLocaleDateString();
     const formattedTime = currentDate.toLocaleTimeString();
 
@@ -44,55 +49,55 @@ function executeCommand(commandToRun, actionName, isStartLog = false) {
         const successMsg = `${timestamp} ${actionName} 执行成功:\n${stdout}`;
         logMessage(successMsg);
 
-        // Nếu lệnh là start.sh, lưu log thành latestStartLog
+        // 如果是 start.sh，保存日志到 latestStartLog
         if (isStartLog) {
             latestStartLog = successMsg;
         }
     });
 }
 
-// Hàm thực thi lệnh shell cho start.sh
+// 执行 start.sh 的 shell 命令函数
 function runShellCommand() {
-    const commandToRun = "cd ~/serv00-play/singbox/ && bash start.sh";
-    executeCommand(commandToRun, "start.sh", true); // Đánh dấu là log từ start.sh
+    const commandToRun = `cd ${process.env.HOME}/serv00-play/singbox/ && bash start.sh`;
+    executeCommand(commandToRun, "start.sh", true); // 标记为来自 start.sh 的日志
 }
 
-// Hàm KeepAlive để chạy keepalive.sh
+// KeepAlive 函数，用于执行 keepalive.sh
 function KeepAlive() {
-    const commandToRun = "bash /home/hoangminhhmp/serv00-play/keepalive.sh";
+    const commandToRun = `bash ${process.env.HOME}/serv00-play/keepalive.sh`;
     executeCommand(commandToRun, "keepalive.sh");
 }
 
-// Tự động chạy lệnh keepalive.sh sau mỗi 20 giây
-setInterval(KeepAlive, 20000); // 20000ms = 20 giây
+// 每隔20秒自动执行 keepalive.sh
+setInterval(KeepAlive, 20000); // 20000ms = 20秒
 
-// API endpoint /info để thực thi cả start.sh và keepalive.sh
+// API endpoint /info 执行 start.sh 和 keepalive.sh
 app.get("/info", function (req, res) {
-    runShellCommand(); // Gọi trực tiếp lệnh bash start.sh
-    KeepAlive();       // Gọi trực tiếp lệnh bash keepalive.sh
-    res.type("html").send("<pre> Serv00 和 KeepAlive 已复活成功！</pre>");
+    runShellCommand(); // 直接调用 bash start.sh 命令
+    KeepAlive();       // 直接调用 bash keepalive.sh 命令
+    res.type("html").send("<pre> Serv00 和 KeepAlive 已成功恢复！</pre>");
 });
 
-// API endpoint /logs_hnvn để hiển thị log từ start.sh
-app.get("/logs_hnvn", function (req, res) {
-    // Hiển thị latestStartLog của lệnh start.sh gần nhất
+// API endpoint /node_info 显示 start.sh 的日志
+app.get("/node_info", function (req, res) {
+    // 显示最近一次 start.sh 执行日志
     res.type("html").send("<pre>" + latestStartLog + "</pre>");
 });
 
-// API endpoint /keepalive để hiển thị toàn bộ log
+// API endpoint /keepalive 显示所有日志
 app.get("/keepalive", function (req, res) {
     res.type("html").send("<pre>" + logs.join("\n") + "</pre>");
 });
 
-// 404 xử lý
+// 404 处理
 app.use((req, res, next) => {
-    if (req.path === '/info' || req.path === '/logs_hnvn' || req.path === '/keepalive') {
+    if (req.path === '/info' || req.path === '/node_info' || req.path === '/keepalive') {
         return next();
     }
     res.status(404).send('页面未找到');
 });
 
-// Khởi động server
+// 启动服务器
 app.listen(3000, () => {
     const currentDate = new Date();
     const formattedDate = currentDate.toLocaleDateString();
