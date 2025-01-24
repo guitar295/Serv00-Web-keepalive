@@ -16,14 +16,11 @@ let latestStartLog = "";
 
 // 日志记录函数
 function logMessage(message) {
-    // 添加新日志到数组
     logs.push(message);
-    // 保证数组最多包含5个元素
     if (logs.length > 5) {
         logs.shift();
     }
 
-    // 将日志内容写入 error.log 文件
     const logContent = logs.join("\n");
     const logFilePath = `${process.env.HOME}/domains/${USERNAME}.serv00.net/logs/error.log`;
     fs.writeFileSync(logFilePath, logContent, 'utf8'); // 覆盖写入文件
@@ -42,14 +39,17 @@ function executeCommand(commandToRun, actionName, isStartLog = false) {
             logMessage(errorMsg);
             return;
         }
+
         if (stderr) {
-            const stderrMsg = `${timestamp} ${actionName} 执行标准错误输出: ${stderr}`;
-            logMessage(stderrMsg);
+            if (!stderr.includes("Could not open file msg.json: No such file or directory")) {
+                const stderrMsg = `${timestamp} ${actionName} 执行标准错误输出: ${stderr}`;
+                logMessage(stderrMsg);
+            }
         }
+
         const successMsg = `${timestamp} ${actionName} 执行成功:\n${stdout}`;
         logMessage(successMsg);
 
-        // 如果是 start.sh，保存日志到 latestStartLog
         if (isStartLog) {
             latestStartLog = successMsg;
         }
@@ -63,8 +63,11 @@ function runShellCommand() {
             cd ${process.env.HOME}/serv00-play/singbox/ && bash start.sh
         fi
     `;
-    executeCommand(commandToRun, "start.sh", true); // 标记为来自 start.sh 的日志
+    executeCommand(commandToRun, "start.sh", true);
 }
+
+// 每隔30秒运行 runShellCommand
+setInterval(runShellCommand, 30000); // 30000ms = 30秒
 
 // KeepAlive 函数，用于执行 keepalive.sh
 function KeepAlive() {
@@ -77,14 +80,13 @@ setInterval(KeepAlive, 20000); // 20000ms = 20秒
 
 // API endpoint /info 执行 start.sh 和 keepalive.sh
 app.get("/info", function (req, res) {
-    runShellCommand(); // 直接调用 bash start.sh 命令
-    KeepAlive();       // 直接调用 bash keepalive.sh 命令
+    runShellCommand();
+    KeepAlive();
     res.type("html").send("<pre> Serv00 和 KeepAlive 已成功恢复！</pre>");
 });
 
 // API endpoint /node_info 显示 start.sh 的日志
 app.get("/node_info", function (req, res) {
-    // 显示最近一次 start.sh 执行日志
     res.type("html").send("<pre>" + latestStartLog + "</pre>");
 });
 
