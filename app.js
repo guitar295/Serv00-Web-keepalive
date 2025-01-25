@@ -20,10 +20,6 @@ function logMessage(message) {
     if (logs.length > 5) {
         logs.shift();
     }
-
-    const logContent = logs.join("\n");
-    const logFilePath = `${process.env.HOME}/domains/${USERNAME}.serv00.net/logs/error.log`;
-    fs.writeFileSync(logFilePath, logContent, 'utf8'); // 覆盖写入文件
 }
 
 // 执行通用 shell 命令的函数
@@ -59,15 +55,18 @@ function executeCommand(commandToRun, actionName, isStartLog = false) {
 // 执行 start.sh 的 shell 命令函数
 function runShellCommand() {
     const commandToRun = `
-        if ! ps aux | grep '[s]erv00sb' > /dev/null || ! ps aux | grep '[c]loudflared' > /dev/null; then
+        # Kiểm tra và khởi động lại nếu tiến trình bị dừng
+        if ! pgrep -f '[s]erv00sb' > /dev/null || ! pgrep -f '[c]loudflared' > /dev/null; then
+            log_msg="$(date) Detected stopped process. Restarting start.sh..."
+            logs.push(log_msg); // Thêm log vào mảng logs[]
             cd ${process.env.HOME}/serv00-play/singbox/ && bash start.sh
         fi
     `;
     executeCommand(commandToRun, "start.sh", true);
 }
 
-// 每隔30秒运行 runShellCommand
-setInterval(runShellCommand, 30000); // 30000ms = 30秒
+// 每隔20秒运行 runShellCommand
+setInterval(runShellCommand, 20000); // 20000ms = 20秒
 
 // KeepAlive 函数，用于执行 keepalive.sh
 function KeepAlive() {
