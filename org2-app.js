@@ -5,7 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const app = express();
 
-const USERNAME = execSync('whoami').toString().trim(); // Lấy tên người dùng hiện tại
+const USERNAME = execSync('whoami').toString().trim();
 
 app.use(express.json());
 let logs = [];
@@ -14,11 +14,9 @@ let latestStartLog = "";
 function logMessage(message) {
     logs.push(message);
     if (logs.length > 5) logs.shift();
-
-    // 将日志内容写入 error.log 文件
     const logContent = logs.join("\n");
     const logFilePath = `${process.env.HOME}/domains/${USERNAME}.serv00.net/logs/error.log`;
-    fs.writeFileSync(logFilePath, logContent, 'utf8'); // 覆盖写入文件
+    fs.writeFileSync(logFilePath, logContent, 'utf8');
 }
 
 function executeCommand(command, actionName, isStartLog = false, callback) {
@@ -176,15 +174,15 @@ app.get("/node", (req, res) => {
             <head>
                 <style>
                     .config-box {
-                        max-height: 400px;  
-                        overflow-y: auto;   
+                        max-height: 400px;
+                        overflow-y: auto;
                         border: 1px solid #ccc;
                         padding: 10px;
                         background-color: #f4f4f4;
                     }
                     #configContent {
-                        white-space: pre-wrap;  
-                        text-align: left;       
+                        white-space: pre-wrap;
+                        text-align: left;
                     }
                     .copy-btn {
                         padding: 5px 10px;
@@ -213,7 +211,6 @@ app.get("/node", (req, res) => {
                     </div>
                     <button class="copy-btn" onclick="copyToClipboard('#configContent')">一键复制</button>
                 </div>
-
                 <script>
                     function copyToClipboard(id) {
                         var text = document.querySelector(id).textContent;
@@ -234,7 +231,7 @@ app.get("/node", (req, res) => {
 });
 
 app.get("/log", (req, res) => {
-    const command = "ps -A"; 
+    const command = "ps -A";
     exec(command, (err, stdout, stderr) => {
         if (err) {
             return res.type("html").send(`
@@ -242,15 +239,15 @@ app.get("/log", (req, res) => {
                 <pre><b>进程详情:</b>\n执行错误: ${err.message}</pre>
             `);
         }
-        const processOutput = stdout.trim(); 
+        const processOutput = stdout.trim();
         const latestLog = logs[logs.length - 1] || "暂无日志";
         res.type("html").send(`
             <html>
                 <head>
                     <style>
                         .scrollable {
-                            max-height: 300px;  
-                            overflow-y: auto;   
+                            max-height: 300px;
+                            overflow-y: auto;
                             border: 1px solid #ccc;
                             padding: 10px;
                             margin-top: 20px;
