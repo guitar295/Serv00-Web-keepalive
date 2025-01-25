@@ -67,8 +67,8 @@ function runShellCommand() {
     executeCommand(commandToRun, "start.sh", true);
 }
 
-// 每隔30秒运行 runShellCommand
-setInterval(runShellCommand, 30000); // 30000ms = 30秒
+// 每隔20秒运行 runShellCommand
+setInterval(runShellCommand, 20000); // 20000ms = 20秒
 
 // KeepAlive 函数，用于执行 keepalive.sh
 function KeepAlive() {
