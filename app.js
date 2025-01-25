@@ -1,16 +1,24 @@
 require('dotenv').config();
 const express = require("express");
-const { exec } = require("child_process");
+const { exec, execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const app = express();
+
+const USERNAME = execSync('whoami').toString().trim();
+
 app.use(express.json());
 let logs = [];
 let latestStartLog = "";
+
 function logMessage(message) {
     logs.push(message);
     if (logs.length > 5) logs.shift();
+    const logContent = logs.join("\n");
+    const logFilePath = `${process.env.HOME}/domains/${USERNAME}.serv00.net/logs/error.log`;
+    fs.writeFileSync(logFilePath, logContent, 'utf8');
 }
+
 function executeCommand(command, actionName, isStartLog = false, callback) {
     exec(command, (err, stdout, stderr) => {
         const timestamp = new Date().toLocaleString();
@@ -28,15 +36,19 @@ function executeCommand(command, actionName, isStartLog = false, callback) {
         if (callback) callback(stdout);
     });
 }
+
 function runShellCommand() {
     const command = `cd ${process.env.HOME}/serv00-play/singbox/ && bash start.sh`;
     executeCommand(command, "start.sh", true);
 }
+
 function KeepAlive() {
     const command = `cd ${process.env.HOME}/serv00-play/ && bash keepalive.sh`;
     executeCommand(command, "keepalive.sh", true);
 }
+
 setInterval(KeepAlive, 20000);
+
 app.get("/info", (req, res) => {
     runShellCommand();
     KeepAlive();
@@ -162,15 +174,15 @@ app.get("/node", (req, res) => {
             <head>
                 <style>
                     .config-box {
-                        max-height: 400px;  
-                        overflow-y: auto;   
+                        max-height: 400px;
+                        overflow-y: auto;
                         border: 1px solid #ccc;
                         padding: 10px;
                         background-color: #f4f4f4;
                     }
                     #configContent {
-                        white-space: pre-wrap;  
-                        text-align: left;       
+                        white-space: pre-wrap;
+                        text-align: left;
                     }
                     .copy-btn {
                         padding: 5px 10px;
@@ -199,7 +211,6 @@ app.get("/node", (req, res) => {
                     </div>
                     <button class="copy-btn" onclick="copyToClipboard('#configContent')">一键复制</button>
                 </div>
-
                 <script>
                     function copyToClipboard(id) {
                         var text = document.querySelector(id).textContent;
@@ -218,8 +229,9 @@ app.get("/node", (req, res) => {
         res.type("html").send(htmlContent);
     });
 });
+
 app.get("/log", (req, res) => {
-    const command = "ps -A"; 
+    const command = "ps -A";
     exec(command, (err, stdout, stderr) => {
         if (err) {
             return res.type("html").send(`
@@ -227,15 +239,15 @@ app.get("/log", (req, res) => {
                 <pre><b>进程详情:</b>\n执行错误: ${err.message}</pre>
             `);
         }
-        const processOutput = stdout.trim(); 
+        const processOutput = stdout.trim();
         const latestLog = logs[logs.length - 1] || "暂无日志";
         res.type("html").send(`
             <html>
                 <head>
                     <style>
                         .scrollable {
-                            max-height: 300px;  
-                            overflow-y: auto;   
+                            max-height: 300px;
+                            overflow-y: auto;
                             border: 1px solid #ccc;
                             padding: 10px;
                             margin-top: 20px;
@@ -253,6 +265,7 @@ app.get("/log", (req, res) => {
         `);
     });
 });
+
 app.use((req, res, next) => {
     const validPaths = ["/info", "/node", "/log"];
     if (validPaths.includes(req.path)) {
@@ -260,6 +273,7 @@ app.use((req, res, next) => {
     }
     res.status(404).send("页面未找到");
 });
+
 app.listen(3000, () => {
     const timestamp = new Date().toLocaleString();
     const startMsg = `${timestamp} 服务器已启动，监听端口 3000`;
