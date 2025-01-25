@@ -53,28 +53,29 @@ function executeCommand(commandToRun, actionName, isStartLog = false) {
     });
 }
 
-// 修改后的 runShellCommand 函数
+// runShellCommand 函数
 function runShellCommand() {
     const checkProcessesCommand = "if ! pgrep -f '[s]erv00sb' > /dev/null || ! pgrep -f '[c]loudflared' > /dev/null; then";
     const commandToRun = `${checkProcessesCommand} cd ${process.env.HOME}/serv00-play/singbox/ && bash start.sh; fi`;
     executeCommand(commandToRun, "start.sh", true);
 }
 
-// 修改后的 KeepAlive 函数
+// KeepAlive 函数 (已停用，保留代码以备将来启用)
 function KeepAlive() {
     const checkProcessesCommand = "if ! pgrep -f '[s]erv00sb' > /dev/null || ! pgrep -f '[c]loudflared' > /dev/null; then";
     const commandToRun = `${checkProcessesCommand} bash ${process.env.HOME}/serv00-play/keepalive.sh; fi`;
     executeCommand(commandToRun, "keepalive.sh");
 }
 
-// 每隔20秒自动执行 keepalive.sh 和 runShellCommand()
-setInterval(KeepAlive, 20000);
+// 每隔20秒自动执行 runShellCommand()
+// 保留 KeepAlive 的 setInterval 代码，暂时注释掉
 setInterval(runShellCommand, 20000);
+// setInterval(KeepAlive, 20000); // 暂时停用 KeepAlive
 
 // API endpoint /info 执行 start.sh 和 keepalive.sh
 app.get("/info", function (req, res) {
     runShellCommand();
-    KeepAlive();
+    // KeepAlive(); // 暂时停用 KeepAlive
     res.type("html").send("<pre> Serv00 和 KeepAlive 已成功恢复！</pre>");
 });
 
