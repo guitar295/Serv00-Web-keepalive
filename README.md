@@ -9,5 +9,5 @@ bash <(curl -Ls https://raw.githubusercontent.com/guitar295/Serv00-Web-keepalive
 
 一键部署网页保活2： 
 
-bash <(curl -Ls https://raw.githubusercontent.com/ryty1/htmlalive/refs/heads/main/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/guitar295/Serv00-Web-keepalive/refs/heads/main/br-install.sh)
 
