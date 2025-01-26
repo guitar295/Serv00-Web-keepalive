@@ -11,8 +11,8 @@ NODE_PORT=3000
 DOMAIN_DIR="/home/$USERNAME/domains/$DOMAIN"
 APP_JS_PATH="$DOMAIN_DIR/public_nodejs/app.js"
 HY2_IP_PATH="$DOMAIN_DIR/public_nodejs/hy2ip.sh"
-APP_JS_URL="https://raw.githubusercontent.com/ryty1/htmlalive/main/app.js"
-HY2_SH_URL="https://raw.githubusercontent.com/ryty1/htmlalive/main/hy2ip.sh"
+APP_JS_URL="https://raw.githubusercontent.com/guitar295/Serv00-Web-keepalive/refs/heads/main/app.js"
+HY2_SH_URL="https://raw.githubusercontent.com/guitar295/Serv00-Web-keepalive/refs/heads/main/hy2ip.sh"
 echo " ———————————————————————————————————————————————————————————— "
 cd && devil www del "$DOMAIN"  > /dev/null 2>&1
 if [[ $? -eq 0 ]]; then
