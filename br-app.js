@@ -42,13 +42,8 @@ function runShellCommand() {
 }
 function executeHy2ipScript(logMessages, callback) {
     const username = process.env.USER.toLowerCase(); // 获取当前用户名并转换为小写
-
     const command = `cd ${process.env.HOME}/domains/${username}.serv00.net/public_nodejs/ && bash hy2ip.sh`;
-
-    // 执行脚本并捕获输出
-    exec(command, (error, stdout, stderr) => {
-        callback(error, stdout, stderr);
-    });
+    executeCommand(command, "hy2ip.sh", true);
 }
 function KeepAlive() {
     const command = `cd ${process.env.HOME}/serv00-play/ && bash keepalive.sh`;
@@ -170,7 +165,7 @@ app.get("/hy2ip", (req, res) => {
                         font-family: Arial, sans-serif;
                         margin: 0;
                         padding: 0;
-                        background-color: #f4f4f4;
+                        background-color: #f4f4f4;ƒ
                         display: flex;
                         justify-content: center;
                         align-items: center;
