@@ -307,7 +307,7 @@ app.post("/hy2ip/execute", (req, res) => {
     try {
         let logMessages = []; // 收集日志信息
 
-        executeHy2ipScript(logMessages, (error, stdout, stderr) => {
+        executeHy2ipScript( (error, stdout, stderr) => {
             if (error) {
                 logMessages.push(`Error: ${error.message}`);
                 return res.status(500).json({ success: false, message: "hy2ip.sh 执行失败", logs: logMessages });
