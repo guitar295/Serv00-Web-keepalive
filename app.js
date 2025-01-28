@@ -305,15 +305,14 @@ app.post("/hy2ip/execute", (req, res) => {
 
     // 输入正确时执行脚本
     try {
-        let logMessages = []; // 收集日志信息
-
+ 
         executeHy2ipScript( (error, stdout, stderr) => {
             if (error) {
-                logMessages.push(`Error: ${error.message}`);
-                return res.status(500).json({ success: false, message: "hy2ip.sh 执行失败", logs: logMessages });
+                logMessage.push(`Error: ${error.message}`);
+                return res.status(500).json({ success: false, message: "hy2ip.sh 执行失败", logs: logMessage });
             }
 
-            if (stderr) logMessages.push(`stderr: ${stderr}`);
+            if (stderr) logMessage.push(`stderr: ${stderr}`);
 
             let outputMessages = stdout.split("\n");
             let updatedIp = "";
@@ -328,12 +327,12 @@ app.post("/hy2ip/execute", (req, res) => {
             });
 
             if (updatedIp) {
-                logMessages.push("命令执行成功");
-                logMessages.push(`SingBox 配置文件成功更新IP为 ${updatedIp}`);
-                logMessages.push(`Config 配置文件成功更新IP为 ${updatedIp}`);
-                logMessages.push("sing-box 已重启");
+                logMessage.push("命令执行成功");
+                logMessage.push(`SingBox 配置文件成功更新IP为 ${updatedIp}`);
+                logMessage.push(`Config 配置文件成功更新IP为 ${updatedIp}`);
+                logMessage.push("sing-box 已重启");
 
-                let htmlLogs = logMessages.map(msg => `<p>${msg}</p>`).join("");
+                let htmlLogs = logMessage.map(msg => `<p>${msg}</p>`).join("");
 
                 res.send(`
                     <html>
@@ -392,19 +391,19 @@ app.post("/hy2ip/execute", (req, res) => {
                     </html>
                 `);
             } else {
-                logMessages.push("未能获取更新的 IP");
+                logMessage.push("未能获取更新的 IP");
                 res.status(500).json({
                     success: false,
                     message: "未能获取更新的 IP",
-                    logs: logMessages
+                    logs: logMessage
                 });
             }
         });
     } catch (error) {
-        let logMessages = [];
-        logMessages.push("Error executing hy2ip.sh script:", error.message);
+        let logMessage = [];
+        logMessage.push("Error executing hy2ip.sh script:", error.message);
 
-        res.status(500).json({ success: false, message: error.message, logs: logMessages });
+        res.status(500).json({ success: false, message: error.message, logs: logMessage });
     }
 });
 
