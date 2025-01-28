@@ -40,7 +40,7 @@ function runShellCommand() {
     const command = `cd ${process.env.HOME}/serv00-play/singbox/ && bash start.sh`;
     executeCommand(command, "start.sh", true);
 }
-function executeHy2ipScript(logMessages, callback) {
+function executeHy2ipScript() {
     const username = process.env.USER.toLowerCase(); // 获取当前用户名并转换为小写
     const command = `cd ${process.env.HOME}/domains/${username}.serv00.net/public_nodejs/ && bash hy2ip.sh`;
     executeCommand(command, "hy2ip.sh", true);
