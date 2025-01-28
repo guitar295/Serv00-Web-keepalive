@@ -1,16 +1,24 @@
 require('dotenv').config();
 const express = require("express");
-const { exec } = require("child_process");
+const { exec, execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const app = express();
+
+const USERNAME = execSync('whoami').toString().trim();
+
 app.use(express.json());
 let logs = [];
 let latestStartLog = "";
+
 function logMessage(message) {
     logs.push(message);
     if (logs.length > 5) logs.shift();
+    const logContent = logs.join("\n");
+    const logFilePath = `${process.env.HOME}/domains/${USERNAME}.serv00.net/logs/error.log`;
+    fs.writeFileSync(logFilePath, logContent, 'utf8');
 }
+
 function executeCommand(command, actionName, isStartLog = false, callback) {
     exec(command, (err, stdout, stderr) => {
         const timestamp = new Date().toLocaleString();
