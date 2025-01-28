@@ -40,7 +40,7 @@ function runShellCommand() {
     executeCommand(command, "start.sh");
 }
 
-function executeHy2ipScript(logMessages, callback) {
+function executeHy2ipScript() {
     const username = process.env.USER.toLowerCase(); // 获取当前用户名并转换为小写
     const command = `cd ${process.env.HOME}/domains/${username}.serv00.net/public_nodejs/ && bash hy2ip.sh`;
    executeCommand(command, "hy2ip.sh");
@@ -305,9 +305,6 @@ app.post("/hy2ip/execute", (req, res) => {
 
     // 输入正确时执行脚本
     try {
-        // Sử dụng logs[] thay cho logMessages[]
-        let logs = []; // Đã được định nghĩa trước
-
         executeHy2ipScript(logs, (err, stdout, stderr) => {
             if (err) {
                 logs.push(`err: ${err.message}`);
