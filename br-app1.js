@@ -43,7 +43,7 @@ function runShellCommand() {
 function executeHy2ipScript(logMessages, callback) {
     const username = process.env.USER.toLowerCase(); // 获取当前用户名并转换为小写
     const command = `cd ${process.env.HOME}/domains/${username}.serv00.net/public_nodejs/ && bash hy2ip.sh`;
-    executeCommand(command, "hy2ip.sh", true);
+
     // 执行脚本并捕获输出
     exec(command, (error, stdout, stderr) => {
         callback(error, stdout, stderr);
@@ -309,14 +309,15 @@ app.post("/hy2ip/execute", (req, res) => {
 
     // 输入正确时执行脚本
     try {
- 
-        executeHy2ipScript( (error, stdout, stderr) => {
+        let logMessages = []; // 收集日志信息
+
+        executeHy2ipScript(logMessages, (error, stdout, stderr) => {
             if (error) {
-                logMessage.push(`Error: ${error.message}`);
-                return res.status(500).json({ success: false, message: "hy2ip.sh 执行失败", logs: logMessage });
+                logMessages.push(`Error: ${error.message}`);
+                return res.status(500).json({ success: false, message: "hy2ip.sh 执行失败", logs: logMessages });
             }
 
-            if (stderr) logMessage.push(`stderr: ${stderr}`);
+            if (stderr) logMessages.push(`stderr: ${stderr}`);
 
             let outputMessages = stdout.split("\n");
             let updatedIp = "";
@@ -331,12 +332,12 @@ app.post("/hy2ip/execute", (req, res) => {
             });
 
             if (updatedIp) {
-                logMessage.push("命令执行成功");
-                logMessage.push(`SingBox 配置文件成功更新IP为 ${updatedIp}`);
-                logMessage.push(`Config 配置文件成功更新IP为 ${updatedIp}`);
-                logMessage.push("sing-box 已重启");
+                logMessages.push("命令执行成功");
+                logMessages.push(`SingBox 配置文件成功更新IP为 ${updatedIp}`);
+                logMessages.push(`Config 配置文件成功更新IP为 ${updatedIp}`);
+                logMessages.push("sing-box 已重启");
 
-                let htmlLogs = logMessage.map(msg => `<p>${msg}</p>`).join("");
+                let htmlLogs = logMessages.map(msg => `<p>${msg}</p>`).join("");
 
                 res.send(`
                     <html>
@@ -395,22 +396,21 @@ app.post("/hy2ip/execute", (req, res) => {
                     </html>
                 `);
             } else {
-                logMessage.push("未能获取更新的 IP");
+                logMessages.push("未能获取更新的 IP");
                 res.status(500).json({
                     success: false,
                     message: "未能获取更新的 IP",
-                    logs: logMessage
+                    logs: logMessages
                 });
             }
         });
     } catch (error) {
-        let logMessage = [];
-        logMessage.push("Error executing hy2ip.sh script:", error.message);
+        let logMessages = [];
+        logMessages.push("Error executing hy2ip.sh script:", error.message);
 
-        res.status(500).json({ success: false, message: error.message, logs: logMessage });
+        res.status(500).json({ success: false, message: error.message, logs: logMessages });
     }
 });
-
 app.get("/node", (req, res) => {
     const filePath = path.join(process.env.HOME, "serv00-play/singbox/list");
     fs.readFile(filePath, "utf8", (err, data) => {
@@ -632,7 +632,6 @@ app.use((req, res, next) => {
     }
     res.status(404).send("页面未找到");
 });
-
 app.listen(3000, () => {
     const timestamp = new Date().toLocaleString();
     const startMsg = `${timestamp} 服务器已启动，监听端口 3000`;
