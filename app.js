@@ -1,25 +1,17 @@
 require('dotenv').config();
 const express = require("express");
-const { exec, execSync } = require("child_process");
+const { exec } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const app = express();
-
-const USERNAME = execSync('whoami').toString().trim();
-
 app.use(express.json());
 let logs = [];
 let latestStartLog = "";
-
 function logMessage(message) {
     logs.push(message);
     if (logs.length > 5) logs.shift();
-    const logContent = logs.join("\n");
-    const logFilePath = `${process.env.HOME}/domains/${USERNAME}.serv00.net/logs/error.log`;
-    fs.writeFileSync(logFilePath, logContent, 'utf8');
 }
-
-function executeCommand(command, actionName, isStartLog = false, callback= false) {
+function executeCommand(command, actionName, isStartLog = false, callback) {
     exec(command, (err, stdout, stderr) => {
         const timestamp = new Date().toLocaleString();
         if (err) {
@@ -40,14 +32,19 @@ function runShellCommand() {
     const command = `cd ${process.env.HOME}/serv00-play/singbox/ && bash start.sh`;
     executeCommand(command, "start.sh", true);
 }
-function executeHy2ipScript() {
+function executeHy2ipScript(logMessages, callback) {
     const username = process.env.USER.toLowerCase(); // 获取当前用户名并转换为小写
+
     const command = `cd ${process.env.HOME}/domains/${username}.serv00.net/public_nodejs/ && bash hy2ip.sh`;
-    executeCommand(command, "hy2ip.sh");
+
+    // 执行脚本并捕获输出
+    exec(command, (error, stdout, stderr) => {
+        callback(error, stdout, stderr);
+    });
 }
 function KeepAlive() {
     const command = `cd ${process.env.HOME}/serv00-play/ && bash keepalive.sh`;
-    executeCommand(command, "keepalive.sh");
+    executeCommand(command, "keepalive.sh", true);
 }
 setInterval(KeepAlive, 20000);
 app.get("/info", (req, res) => {
