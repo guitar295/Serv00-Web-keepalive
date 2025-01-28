@@ -302,8 +302,6 @@ app.post("/hy2ip/execute", (req, res) => {
 
     // 输入正确时执行脚本
     try {
-        let logs = []; // 收集日志信息
-
         executeHy2ipScript(logs, (error, stdout, stderr) => {
             if (error) {
                 logs.push(`Error: ${error.message}`);
