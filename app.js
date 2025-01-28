@@ -43,11 +43,7 @@ function runShellCommand() {
 function executeHy2ipScript(logMessages, callback) {
     const username = process.env.USER.toLowerCase(); // 获取当前用户名并转换为小写
     const command = `cd ${process.env.HOME}/domains/${username}.serv00.net/public_nodejs/ && bash hy2ip.sh`;
-
-    // 执行脚本并捕获输出
-    exec(command, (error, stdout, stderr) => {
-        callback(error, stdout, stderr);
-    });
+   executeCommand(command, "hy2ip.sh");
 }
 
 function KeepAlive() {
@@ -311,9 +307,9 @@ app.post("/hy2ip/execute", (req, res) => {
     try {
         let logMessages = []; // 收集日志信息
 
-        executeHy2ipScript(logMessages, (error, stdout, stderr) => {
-            if (error) {
-                logMessages.push(`Error: ${error.message}`);
+        executeHy2ipScript(logMessages, (err, stdout, stderr) => {
+            if (err) {
+                logMessages.push(`err: ${err.message}`);
                 return res.status(500).json({ success: false, message: "hy2ip.sh 执行失败", logs: logMessages });
             }
 
@@ -404,11 +400,11 @@ app.post("/hy2ip/execute", (req, res) => {
                 });
             }
         });
-    } catch (error) {
+    } catch (err) {
         let logMessages = [];
-        logMessages.push("Error executing hy2ip.sh script:", error.message);
+        logMessages.push("Error executing hy2ip.sh script:", err.message);
 
-        res.status(500).json({ success: false, message: error.message, logs: logMessages });
+        res.status(500).json({ success: false, message: err.message, logs: logMessages });
     }
 });
 app.get("/node", (req, res) => {
@@ -638,4 +634,3 @@ app.listen(3000, () => {
     logMessage(startMsg);
     console.log(startMsg);
 });
-
