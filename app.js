@@ -19,7 +19,7 @@ function logMessage(message) {
     fs.writeFileSync(logFilePath, logContent, 'utf8');
 }
 
-function executeCommand(command, actionName, isStartLog = false, callback) {
+function executeCommand(command, actionName, isStartLog = false, callback= false) {
     exec(command, (err, stdout, stderr) => {
         const timestamp = new Date().toLocaleString();
         if (err) {
