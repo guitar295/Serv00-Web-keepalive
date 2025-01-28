@@ -9,7 +9,6 @@ const USERNAME = execSync('whoami').toString().trim();
 
 app.use(express.json());
 let logs = [];
-let latestStartLog = "";
 
 function logMessage(message) {
     logs.push(message);
@@ -19,7 +18,7 @@ function logMessage(message) {
     fs.writeFileSync(logFilePath, logContent, 'utf8');
 }
 
-function executeCommand(command, actionName, isStartLog = false, callback) {
+function executeCommand(command, actionName, callback) {
     exec(command, (err, stdout, stderr) => {
         const timestamp = new Date().toLocaleString();
         if (err) {
@@ -32,19 +31,18 @@ function executeCommand(command, actionName, isStartLog = false, callback) {
         }
         const successMsg = `${actionName} 执行成功:\n${stdout}`;
         logMessage(successMsg);
-        if (isStartLog) latestStartLog = successMsg;
         if (callback) callback(stdout);
     });
 }
 
 function runShellCommand() {
     const command = `cd ${process.env.HOME}/serv00-play/singbox/ && bash start.sh`;
-    executeCommand(command, "start.sh", true);
+    executeCommand(command, "start.sh");
 }
 
 function KeepAlive() {
     const command = `cd ${process.env.HOME}/serv00-play/ && bash keepalive.sh`;
-    executeCommand(command, "keepalive.sh", true);
+    executeCommand(command, "keepalive.sh");
 }
 
 setInterval(KeepAlive, 20000);
