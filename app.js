@@ -505,7 +505,7 @@ app.post("/hy2ip/execute", (req, res) => {
 
     function addLog(message) {
         if (logMessages.length >= 10) {
-            logMessages.shift(); // Xóa phần tử đầu tiên nếu mảng đã có 10 phần tử
+            logMessages.shift(); 
         }
         logMessages.push(message);
     }
