@@ -28,7 +28,7 @@ function logMessage(message) {
     fs.writeFileSync(logFilePath, logContent, 'utf8');
 }
 
-function executeCommand(command, actionName, isStartLog = false, callback) {
+function executeCommand(command, actionName, callback) {
     exec(command, (err, stdout, stderr) => {
         const timestamp = new Date().toLocaleString();
         if (err) {
@@ -41,16 +41,16 @@ function executeCommand(command, actionName, isStartLog = false, callback) {
         }
         const successMsg = `${actionName} 执行成功:\n${stdout}`;
         logMessage(successMsg);
-        if (isStartLog) latestStartLog = successMsg;
         if (callback) callback(stdout);
     });
 }
+
 function runShellCommand() {
     const command = `cd ${process.env.HOME}/serv00-play/singbox/ && bash start.sh`;
-    executeCommand(command, "start.sh", true);
+    executeCommand(command, "start.sh");
 }
-function executeHy2ipScript(logMessages, callback) {
 
+function executeHy2ipScript(logMessages, callback) {
     const command = `cd ${process.env.HOME}/domains/${username}.serv00.net/public_nodejs/ && bash hy2ip.sh`;
 
     // 执行脚本并捕获输出
@@ -58,10 +58,12 @@ function executeHy2ipScript(logMessages, callback) {
         callback(error, stdout, stderr);
     });
 }
+
 function KeepAlive() {
     const command = `cd ${process.env.HOME}/serv00-play/ && bash keepalive.sh`;
-    executeCommand(command, "keepalive.sh", true);
+    executeCommand(command, "keepalive.sh");
 }
+
 setInterval(KeepAlive, 20000);
 
 // 递归获取目录下所有文件（排除本地 `public` 和 `tmp`）
