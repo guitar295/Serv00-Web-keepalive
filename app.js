@@ -4,12 +4,11 @@ const { exec } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const app = express();
-
-const username = process.env.USER.toLowerCase(); // 获取当前用户名并转换为小写
+const username = execSync('whoami').toString().trim();
 
 app.use(express.json());
-let logs = [];
 
+let logs = [];
 function logMessage(message) {
     logs.push(message);
     if (logs.length > 5) logs.shift();
