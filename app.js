@@ -18,8 +18,6 @@ const EXCLUDED_DIRS = ['public', 'tmp']; // **本地 `public` 和 `tmp` 目录�
 
 app.use(express.json());
 let logs = [];
-let latestStartLog = "";
-
 function logMessage(message) {
     logs.push(message);
     if (logs.length > 5) logs.shift();
