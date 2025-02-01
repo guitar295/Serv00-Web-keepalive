@@ -501,43 +501,51 @@ app.post("/hy2ip/execute", (req, res) => {
     }
 
     try {
-        let logMessages = [];
+    let logMessages = [];
 
-        executeHy2ipScript(logMessages, (error, stdout, stderr) => {
-            let updatedIp = "";
-
-            if (stdout) {
-                let outputMessages = stdout.split("\n");
-                outputMessages.forEach(line => {
-                    if (line.includes("SingBox 配置文件成功更新IP为")) {
-                        updatedIp = line.split("SingBox 配置文件成功更新IP为")[1].trim();
-                    }
-                    if (line.includes("Config 配置文件成功更新IP为")) {
-                        updatedIp = line.split("Config 配置文件成功更新IP为")[1].trim();
-                    }
-                });
-                // 去掉 ANSI 颜色码
-                if (updatedIp) {
-                    updatedIp = updatedIp.replace(/\x1B\[[0-9;]*m/g, "");
-                }
-
-                if (updatedIp && updatedIp !== "未找到可用的 IP！") {
-                    logMessages.push("命令执行成功");
-                    logMessages.push(`SingBox 配置文件成功更新IP为 ${updatedIp}`);
-                    logMessages.push(`Config 配置文件成功更新IP为 ${updatedIp}`);
-                    logMessages.push("sing-box 已重启");
-                    res.send(generateHtml("HY2_IP 更新", updatedIp, logMessages));
-                } else {
-                    logMessages.push("命令执行成功");
-                    logMessages.push("没有找到有效 IP");
-                    res.send(generateHtml("HY2_IP 更新", "无", logMessages, true));
-                }
-            }
-        });
-    } catch (error) {
-        let logMessages = ["命令执行成功", "没有找到有效 IP"];
-        res.send(generateHtml("HY2_IP 更新", "无", logMessages, true));
+    function addLog(message) {
+        if (logMessages.length >= 10) {
+            logMessages.shift(); // Xóa phần tử đầu tiên nếu mảng đã có 10 phần tử
+        }
+        logMessages.push(message);
     }
+
+    executeHy2ipScript(logMessages, (error, stdout, stderr) => {
+        let updatedIp = "";
+
+        if (stdout) {
+            let outputMessages = stdout.split("\n");
+            outputMessages.forEach(line => {
+                if (line.includes("SingBox 配置文件成功更新IP为")) {
+                    updatedIp = line.split("SingBox 配置文件成功更新IP为")[1].trim();
+                }
+                if (line.includes("Config 配置文件成功更新IP为")) {
+                    updatedIp = line.split("Config 配置文件成功更新IP为")[1].trim();
+                }
+            });
+
+            // 去掉 ANSI 颜色码
+            if (updatedIp) {
+                updatedIp = updatedIp.replace(/\x1B\[[0-9;]*m/g, "");
+            }
+
+            if (updatedIp && updatedIp !== "未找到可用的 IP！") {
+                addLog("命令执行成功");
+                addLog(`SingBox 配置文件成功更新IP为 ${updatedIp}`);
+                addLog(`Config 配置文件成功更新IP为 ${updatedIp}`);
+                addLog("sing-box 已重启");
+                res.send(generateHtml("HY2_IP 更新", updatedIp, logMessages));
+            } else {
+                addLog("命令执行成功");
+                addLog("没有找到有效 IP");
+                res.send(generateHtml("HY2_IP 更新", "无", logMessages, true));
+            }
+        }
+    });
+} catch (error) {
+    let logMessages = ["命令执行成功", "没有找到有效 IP"];
+    res.send(generateHtml("HY2_IP 更新", "无", logMessages, true));
+}
 });
 
 // 生成 HTML 页面
