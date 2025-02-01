@@ -4,7 +4,7 @@ const { exec } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const app = express();
-const username = execSync('whoami').toString().trim();
+const username = require('child_process').execSync('whoami').toString().trim();
 
 app.use(express.json());
 
