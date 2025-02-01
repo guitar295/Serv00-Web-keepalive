@@ -19,10 +19,15 @@ const EXCLUDED_DIRS = ['public', 'tmp']; // **本地 `public` 和 `tmp` 目录�
 app.use(express.json());
 let logs = [];
 let latestStartLog = "";
+
 function logMessage(message) {
     logs.push(message);
     if (logs.length > 5) logs.shift();
+    const logContent = logs.join("\n");
+    const logFilePath = `${process.env.HOME}/domains/${USERNAME}.serv00.net/logs/error.log`;
+    fs.writeFileSync(logFilePath, logContent, 'utf8');
 }
+
 function executeCommand(command, actionName, isStartLog = false, callback) {
     exec(command, (err, stdout, stderr) => {
         const timestamp = new Date().toLocaleString();
