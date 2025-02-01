@@ -363,6 +363,9 @@ app.post("/hy2ip/execute", (req, res) => {
     function addLog(message) {
         if (logMessages.length >= 10) {
             logMessages.shift(); 
+          const logContent = logMessages.join("\n");
+          const logFilePath = `${process.env.HOME}/domains/${USERNAME}.serv00.net/logs/error.log`;
+        fs.writeFileSync(logFilePath, logContent, 'utf8');       
         }
         logMessages.push(message);
     }
