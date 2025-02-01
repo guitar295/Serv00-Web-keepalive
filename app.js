@@ -359,7 +359,7 @@ app.post("/hy2ip/execute", (req, res) => {
     try {
     let logMessages = [];
     function addLog(message) {
-        if (logMessages.length >= 10) {
+        if (logMessages.length >= 5) {
             logMessages.shift(); 
         }
         logMessages.push(message);
