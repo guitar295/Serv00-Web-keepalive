@@ -1,20 +1,20 @@
 require('dotenv').config();
 const express = require("express");
-const { exec } = require("child_process");
+const { exec, execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
-const crypto = require('crypto');
 const app = express();
 
-const username = process.env.USER.toLowerCase(); // 获取当前用户名并转换为小写
+const USERNAME = execSync('whoami').toString().trim();
 
 app.use(express.json());
 let logs = [];
+
 function logMessage(message) {
     logs.push(message);
     if (logs.length > 5) logs.shift();
     const logContent = logs.join("\n");
-    const logFilePath = `${process.env.HOME}/domains/${username}.serv00.net/logs/error.log`;
+    const logFilePath = `${process.env.HOME}/domains/${USERNAME}.serv00.net/logs/error.log`;
     fs.writeFileSync(logFilePath, logContent, 'utf8');
 }
 
@@ -41,6 +41,7 @@ function runShellCommand() {
 }
 
 function executeHy2ipScript(logMessages, callback) {
+    const username = process.env.USER.toLowerCase(); // 获取当前用户名并转换为小写
     const command = `cd ${process.env.HOME}/domains/${username}.serv00.net/public_nodejs/ && bash hy2ip.sh`;
 
     // 执行脚本并捕获输出
@@ -62,8 +63,6 @@ app.get("/info", (req, res) => {
     res.type("html").send(`
         <html>
         <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-            <title>系统状态</title>
             <style>
                 body {
                     margin: 0;
@@ -73,97 +72,67 @@ app.get("/info", (req, res) => {
                     justify-content: center;
                     align-items: center;
                     height: 100vh;
-                    width: 100vw;
-                    padding: 0;
-                    overflow: hidden;
                 }
-
                 .content-container {
-                    width: 95%;
-                    max-width: 900px;
+                    width: 100%;
+                    max-width: 600px; /* 最大宽度为600px */
                     background-color: #fff;
                     padding: 20px;
                     border-radius: 8px;
                     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
                     box-sizing: border-box;
-                    text-align: center;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    align-items: center;
+                    text-align: left; /* 保持文字左对齐 */
                 }
-
                 .dynamic-text {
-                    font-size: max(25px, 4vw);
+                    font-size: 24px;
                     font-weight: bold;
                     margin-bottom: 20px;
-                    line-height: 1.3;
-                    text-align: center;
-                    white-space: nowrap;
+                    line-height: 1.5;
+                    text-align: center; /* 两行文本居中 */
                 }
-
                 @keyframes growShrink {
-                    0% { transform: scale(1); }
-                    50% { transform: scale(1.15); }
-                    100% { transform: scale(1); }
+                    0% {
+                        transform: scale(1);
+                    }
+                    50% {
+                        transform: scale(1.2);
+                    }
+                    100% {
+                        transform: scale(1);
+                    }
                 }
-
                 .dynamic-text span {
                     display: inline-block;
-                    animation: growShrink 1s infinite;
-                    animation-delay: calc(0.08s * var(--char-index));
+                    animation: growShrink 1.2s infinite;
+                    animation-delay: calc(0.1s * var(--char-index));
                 }
-
-                /* 强制每行显示两个按钮 */
                 .button-container {
-                    margin-top: 30px;
+                    margin-top: 20px;
                     display: flex;
-                    flex-wrap: wrap;
+                    flex-wrap: wrap; /* 适配小屏，按钮会换行 */
                     gap: 10px;
-                    justify-content: space-between; /* 让按钮两两分布 */
-                    width: 100%; /* 容器宽度设置为 100% */
-                    box-sizing: border-box;
                 }
-
-                /* 按钮样式 */
                 button {
-                    padding: 12px 25px;
-                    font-size: 20px;
-                    background-color: #4CAF50; /* 绿色背景 */
+                    flex: 1;
+                    min-width: 100px;
+                    padding: 10px 15px;
+                    font-size: 16px;
+                    background-color: #007bff;
                     color: white;
                     border: none;
                     border-radius: 4px;
                     cursor: pointer;
-                    transition: background-color 0.3s ease, transform 0.1s;
-                    width: 45%; /* 保证每个按钮宽度为 48%，两列显示 */
-                    min-width: 150px; /* 保证按钮不会过窄 */
-                    box-sizing: border-box;
+                    transition: background-color 0.3s ease;
                 }
-
                 button:hover {
-                    background-color: #45a049; /* 悬停时稍微深一点的绿色 */
-                    transform: scale(1.05);
+                    background-color: #0056b3;
                 }
-
-                /* 响应式调整 */
                 @media (max-width: 600px) {
                     .dynamic-text {
-                        font-size: max(18px, 5vw);
+                        font-size: 20px;
                     }
-
-                    .button-container {
-                        flex-direction: row; /* 保证按钮横向排列 */
-                        width: 100%; /* 保证容器宽度适配 */
-                    }
-
                     button {
-                        font-size: 16px;
-                        width: 45%; /* 每行两个按钮 */
-                        min-width: 120px; /* 最小宽度保证 */
-                    }
-
-                    .content-container {
-                        padding: 15px;
+                        font-size: 14px;
                     }
                 }
             </style>
@@ -171,7 +140,7 @@ app.get("/info", (req, res) => {
         <body>
             <div class="content-container">
                 <div class="dynamic-text">
-                    ${"SingBox 已 复 活".split("").map((char, index) => 
+                    ${"SingBox 已复活".split("").map((char, index) => 
                         `<span style="--char-index: ${index};">${char}</span>`).join("")}
                 </div>
                 <div class="dynamic-text">
@@ -198,7 +167,6 @@ app.get("/hy2ip", (req, res) => {
         <html>
             <head>
                 <title>HY2_IP 更新</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
                 <style>
                     body {
                         font-family: Arial, sans-serif;
@@ -209,12 +177,10 @@ app.get("/hy2ip", (req, res) => {
                         justify-content: center;
                         align-items: center;
                         height: 100vh;
-                        width: 100vw;
-                        overflow: hidden;
                     }
                     .container {
-                        width: 95%;
-                        max-width: 600px;
+                        width: 100%;
+                        max-width: 600px; /* 最大宽度为 600px */
                         background-color: #fff;
                         padding: 20px;
                         border-radius: 8px;
@@ -235,33 +201,25 @@ app.get("/hy2ip", (req, res) => {
                     input[type="text"] {
                         width: 100%;
                         padding: 12px;
-                        font-size: 16px;
+                        font-size: 14px;
                         border: 1px solid #ccc;
                         border-radius: 4px;
                         box-sizing: border-box;
                         margin-bottom: 15px;
-                        text-align: center;
-                        transition: 0.3s;
-                    }
-                    input[type="text"]:focus {
-                        border-color: #007bff;
-                        outline: none;
-                        box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
                     }
                     button {
                         width: 100%;
                         padding: 12px;
-                        font-size: 18px;
+                        font-size: 16px;
                         background-color: #007bff;
                         color: white;
                         border: none;
                         border-radius: 4px;
                         cursor: pointer;
-                        transition: 0.3s;
+                        transition: background-color 0.3s ease;
                     }
                     button:hover {
                         background-color: #0056b3;
-                        transform: scale(1.05);
                     }
                     @media (max-width: 600px) {
                         .container {
@@ -279,12 +237,12 @@ app.get("/hy2ip", (req, res) => {
             <body>
                 <div class="container">
                     <h1>HY2_IP 更新</h1>
-                    <p>请输入 <b>更新</b> 以确认执行 IP 更新。</p>
+                    <p>请输入“更新”以确认执行 IP 更新。</p>
                     <form action="/hy2ip/execute" method="POST">
-                        <input type="text" name="confirmation" placeholder="更新">
+                        <input type="text" name="confirmation" placeholder="请输入 更新">
                         <button type="submit">提交</button>
                     </form>
-                    <p>⚠️ 不同 IP 更新后原线路会失效，请复制新信息使用。</p>
+                    <p>【注】：不同 IP 如成功更换，原线路会失效，请复制新信息食用。</p>
                 </div>
             </body>
         </html>
@@ -298,31 +256,31 @@ app.post("/hy2ip/execute", (req, res) => {
         return res.send(`
             <html>
                 <head>
-                    <meta name="viewport" content="width=device-width, initial-scale=1">
                     <title>HY2_IP 更新失败</title>
                     <style>
                         body {
                             font-family: Arial, sans-serif;
+                            margin: 0;
+                            padding: 0;
                             background-color: #f4f4f4;
                             display: flex;
                             justify-content: center;
                             align-items: center;
                             height: 100vh;
-                            margin: 0;
-                            padding: 0 10px;
                         }
                         .container {
-                            width: 90%;
-                            max-width: 600px;
+                            width: 100%;
+                            max-width: 800px;
                             background-color: #fff;
                             padding: 20px;
+                            margin: 0 10px;
                             border-radius: 8px;
                             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
                             text-align: left;
                         }
                         h1 {
-                            font-size: 22px;
-                            margin-bottom: 15px;
+                            font-size: 24px;
+                            margin-bottom: 20px;
                         }
                         p {
                             font-size: 16px;
@@ -334,14 +292,6 @@ app.post("/hy2ip/execute", (req, res) => {
                         }
                         a:hover {
                             text-decoration: underline;
-                        }
-                        @media (max-width: 600px) {
-                            .container {
-                                padding: 15px;
-                            }
-                            h1 {
-                                font-size: 20px;
-                            }
                         }
                     </style>
                 </head>
@@ -357,19 +307,26 @@ app.post("/hy2ip/execute", (req, res) => {
     }
 
     try {
-    let logMessages = [];
-    function addLog(message) {
-        if (logMessages.length >= 5) {
-            logMessages.shift(); 
-        }
-        logMessages.push(message);
-    }
+        let logMessages = []; // 收集日志信息
 
-    executeHy2ipScript(logMessages, (error, stdout, stderr) => {
-        let updatedIp = "";
+        const addLogMessage = (message) => {
+            logMessages.push(message);
+            if (logMessages.length > 10) {
+                logMessages.shift(); // 移除最早的日志
+            }
+        };
 
-        if (stdout) {
+        executeHy2ipScript(logMessages, (error, stdout, stderr) => {
+            if (error) {
+                addLogMessage(`Error: ${error.message}`);
+                return res.status(500).json({ success: false, message: "hy2ip.sh 执行失败", logs: logMessages });
+            }
+
+            if (stderr) addLogMessage(`stderr: ${stderr}`);
+
             let outputMessages = stdout.split("\n");
+            let updatedIp = "";
+
             outputMessages.forEach(line => {
                 if (line.includes("SingBox 配置文件成功更新IP为")) {
                     updatedIp = line.split("SingBox 配置文件成功更新IP为")[1].trim();
@@ -379,108 +336,86 @@ app.post("/hy2ip/execute", (req, res) => {
                 }
             });
 
-            // 去掉 ANSI 颜色码
             if (updatedIp) {
-                updatedIp = updatedIp.replace(/\x1B\[[0-9;]*m/g, "");
-            }
+                addLogMessage("命令执行成功");
+                addLogMessage(`SingBox 配置文件成功更新IP为 ${updatedIp}`);
+                addLogMessage(`Config 配置文件成功更新IP为 ${updatedIp}`);
+                addLogMessage("sing-box 已重启");
 
-            if (updatedIp && updatedIp !== "未找到可用的 IP！") {
-                addLog("命令执行成功");
-                addLog(`SingBox 配置文件成功更新IP为 ${updatedIp}`);
-                addLog(`Config 配置文件成功更新IP为 ${updatedIp}`);
-                addLog("sing-box 已重启");
-                res.send(generateHtml("HY2_IP 更新", updatedIp, logMessages));
+                let htmlLogs = logMessages.map(msg => `<p>${msg}</p>`).join("");
+
+                res.send(`
+                    <html>
+                        <head>
+                            <title>HY2_IP 更新结果</title>
+                            <style>
+                                body {
+                                    font-family: Arial, sans-serif;
+                                    margin: 0;
+                                    padding: 0;
+                                    background-color: #f4f4f4;
+                                    display: flex;
+                                    justify-content: center;
+                                    align-items: center;
+                                    height: 100vh;
+                                }
+                                .container {
+                                    width: 100%;
+                                    max-width: 800px;
+                                    background-color: #fff;
+                                    padding: 20px;
+                                    margin: 0 10px;
+                                    border-radius: 8px;
+                                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                                    text-align: left;
+                                }
+                                h1 {
+                                    font-size: 24px;
+                                    margin-bottom: 20px;
+                                }
+                                p {
+                                    font-size: 16px;
+                                }
+                                .scrollable {
+                                    max-height: 300px;
+                                    overflow-y: auto;
+                                    border: 1px solid #ccc;
+                                    padding: 10px;
+                                    background-color: #f9f9f9;
+                                    border-radius: 4px;
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="container">
+                                <h1>IP 更新结果</h1>
+                                <p><strong>有效IP：</strong> ${updatedIp}</p>
+                                <div>
+                                    <h2>日志:</h2>
+                                    <div class="scrollable">
+                                        ${htmlLogs}
+                                    </div>
+                                </div>
+                            </div>
+                        </body>
+                    </html>
+                `);
             } else {
-                addLog("命令执行成功");
-                addLog("没有找到有效 IP");
-                res.send(generateHtml("HY2_IP 更新", "无", logMessages, true));
+                addLogMessage("未能获取更新的 IP");
+                res.status(500).json({
+                    success: false,
+                    message: "未能获取更新的 IP",
+                    logs: logMessages
+                });
             }
-        }
-    });
-} catch (error) {
-    let logMessages = ["命令执行成功", "没有找到有效 IP"];
-    res.send(generateHtml("HY2_IP 更新", "无", logMessages, true));
-}
+        });
+    } catch (error) {
+        let logMessages = [];
+        logMessages.push("Error executing hy2ip.sh script:", error.message);
+
+        res.status(500).json({ success: false, message: error.message, logs: logMessages });
+    }
 });
-
-// 生成 HTML 页面
-function generateHtml(title, ip, logs, isError = false) {
-    let ipColor = isError ? "red" : "black";
-    let htmlLogs = logs.map(msg => `<p>${msg}</p>`).join("");
-
-    return `
-        <html>
-            <head>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <title>${title}</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        background-color: #f4f4f4;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        height: 100vh;
-                        margin: 0;
-                        padding: 0 10px;
-                    }
-                    .container {
-                        width: 90%;
-                        max-width: 800px;
-                        background-color: #fff;
-                        padding: 20px;
-                        border-radius: 8px;
-                        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-                        text-align: left;
-                    }
-                    h1 {
-                        font-size: 24px;
-                        margin-bottom: 20px;
-                        text-align: left;
-                    }
-                    p {
-                        font-size: 16px;
-                    }
-                    .scrollable {
-                        max-height: 300px;
-                        overflow-y: auto;
-                        border: 1px solid #ccc;
-                        padding: 10px;
-                        background-color: #f9f9f9;
-                        border-radius: 4px;
-                    }
-                    .ip {
-                        font-weight: bold;
-                        color: ${ipColor};
-                    }
-                    @media (max-width: 600px) {
-                        .container {
-                            padding: 15px;
-                        }
-                        h1 {
-                            font-size: 22px;
-                        }
-                        .scrollable {
-                            max-height: 200px;
-                        }
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>${title}</h1>
-                    <p><strong>有效 IP：</strong> <span class="ip">${ip}</span></p>
-                    <div>
-                        <h2>日志:</h2>
-                        <div class="scrollable">
-                            ${htmlLogs}
-                        </div>
-                    </div>
-                </div>
-            </body>
-        </html>
-    `;
-}
 
 app.get("/node", (req, res) => {
     const filePath = path.join(process.env.HOME, "serv00-play/singbox/list");
@@ -505,8 +440,6 @@ app.get("/node", (req, res) => {
         let htmlContent = `
             <html>
             <head>
-                <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-                <title>节点信息</title>
                 <style>
                     body {
                         margin: 0;
@@ -516,14 +449,13 @@ app.get("/node", (req, res) => {
                         display: flex;
                         justify-content: center;
                         align-items: center;
-                        min-height: 100vh;
-                        padding: 10px;
+                        height: 100vh;
                     }
                     .content-container {
                         width: 90%;
                         max-width: 600px;
                         background-color: #fff;
-                        padding: 15px;
+                        padding: 20px;
                         border-radius: 8px;
                         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
                         text-align: left;
@@ -532,24 +464,22 @@ app.get("/node", (req, res) => {
                     h3 {
                         font-size: 20px;
                         margin-bottom: 10px;
-                        text-align: center;
                     }
                     .config-box {
-                        max-height: 65vh;
+                        max-height: 60vh;
                         overflow-y: auto;
                         border: 1px solid #ccc;
-                        padding: 8px;
+                        padding: 10px;
                         background-color: #f9f9f9;
                         box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
                         border-radius: 5px;
                         white-space: pre-wrap;
                         word-break: break-word;
-                        font-size: 14px;
                     }
                     .copy-btn {
                         display: block;
                         width: 100%;
-                        padding: 12px;
+                        padding: 10px;
                         font-size: 16px;
                         background-color: #007bff;
                         color: white;
@@ -557,23 +487,11 @@ app.get("/node", (req, res) => {
                         border-radius: 5px;
                         cursor: pointer;
                         text-align: center;
-                        margin-top: 15px;
+                        margin-top: 20px;
                         transition: background-color 0.3s;
                     }
                     .copy-btn:hover {
                         background-color: #0056b3;
-                    }
-                    @media (max-width: 600px) {
-                        .content-container {
-                            padding: 12px;
-                        }
-                        .config-box {
-                            font-size: 13px;
-                        }
-                        .copy-btn {
-                            font-size: 15px;
-                            padding: 10px;
-                        }
                     }
                 </style>
             </head>
@@ -589,21 +507,32 @@ app.get("/node", (req, res) => {
 
         htmlContent += `
                     </div>
-                    <button class="copy-btn" onclick="copyToClipboard()">一键复制</button>
+                    <button class="copy-btn" onclick="copyToClipboard('#configBox')">一键复制</button>
                 </div>
 
                 <script>
-                    function copyToClipboard() {
-                        const element = document.getElementById("configBox");
-                        let text = Array.from(element.children)
-                            .map(child => child.textContent.trim())
-                            .join("\\n");
+                    function copyToClipboard(id) {
+                        const element = document.querySelector(id);
+                        let text = "";
 
-                        navigator.clipboard.writeText(text).then(() => {
-                            alert("已复制到剪贴板！");
-                        }).catch(() => {
-                            alert("复制失败，请手动复制！");
+                        // 遍历每一行内容，去除首尾空格并拼接
+                        Array.from(element.children).forEach(child => {
+                            text += child.textContent.trim() + "\\n";
                         });
+
+                        // 创建临时文本框进行复制
+                        const textarea = document.createElement('textarea');
+                        textarea.value = text.trim(); // 去除整体的多余空行
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        const success = document.execCommand('copy');
+                        document.body.removeChild(textarea);
+
+                        if (success) {
+                            alert('已复制到剪贴板！');
+                        } else {
+                            alert('复制失败，请手动复制！');
+                        }
                     }
                 </script>
             </body>
@@ -614,7 +543,7 @@ app.get("/node", (req, res) => {
 });
 
 app.get("/log", (req, res) => {
-    const command = "ps aux"; 
+    const command = "ps -A"; 
     exec(command, (err, stdout, stderr) => {
         if (err) {
             return res.type("html").send(`
@@ -627,8 +556,6 @@ app.get("/log", (req, res) => {
         res.type("html").send(`
             <html>
                 <head>
-                    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-                    <title>日志与进程详情</title>
                     <style>
                         body {
                             font-family: Arial, sans-serif;
@@ -642,62 +569,51 @@ app.get("/log", (req, res) => {
                         }
 
                         .container {
-                            width: 95%; /* 让内容接近屏幕边缘 */
-                            max-width: 1200px; /* 避免大屏过宽 */
+                            width: 90%;
+                            max-width: 1000px;
                             background-color: #fff;
-                            padding: 15px;
+                            padding: 20px;
                             border-radius: 8px;
                             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
                             text-align: left;
                             box-sizing: border-box;
-                            min-height: 95vh; /* 适配 16:9，减少上下留白 */
-                            display: flex;
-                            flex-direction: column;
-                            justify-content: center;
                         }
 
                         /* 最近日志部分 */
                         pre.log {
-                            margin-bottom: 15px;
-                            white-space: pre-wrap; /* 自动换行 */
-                            word-wrap: break-word;
-                            overflow-wrap: break-word;
+                            margin-bottom: 20px;
+                            white-space: pre-wrap;  /* 自动换行 */
+                            word-wrap: break-word;  /* 防止超出容器宽度 */
+                            overflow-wrap: break-word; /* 确保长单词不会溢出 */
                             border: 1px solid #ccc;
                             padding: 10px;
                             background-color: #f9f9f9;
-                            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+                            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
                             border-radius: 5px;
                         }
 
                         /* 进程详情部分 */
                         .scrollable {
-                            max-height: 60vh;
-                            overflow-x: auto;
-                            white-space: nowrap;
+                            max-height: 60vh; /* 设置进程详情框高 */
+                            overflow-x: auto; /* 横向滚动 */
+                            white-space: nowrap; /* 禁止换行 */
                             border: 1px solid #ccc;
                             padding: 10px;
                             background-color: #f9f9f9;
-                            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+                            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
                             border-radius: 5px;
                         }
 
                         pre {
-                            margin: 0;
+                            margin: 0; /* 防止 pre 标签内的内容左右溢出 */
                         }
 
                         @media (max-width: 600px) {
                             .container {
-                                width: 98%; /* 在手机上更贴边 */
-                                min-height: 98vh; /* 贴合屏幕 */
+                                width: 95%;
                             }
                             .scrollable {
-                                max-height: 50vh;
-                            }
-                        }
-
-                        @media (min-width: 1200px) {
-                            .container {
-                                max-width: 1000px; /* 避免超宽屏幕内容过散 */
+                                max-height: 50vh; /* 手机屏幕时进程详情高度调整为50% */
                             }
                         }
                     </style>
@@ -716,7 +632,7 @@ app.get("/log", (req, res) => {
 });
 
 app.use((req, res, next) => {
-    const validPaths = ["/info", "/hy2ip", "/node", "/log" ];
+    const validPaths = ["/info", "/hy2ip", "/node", "/log"];
     if (validPaths.includes(req.path)) {
         return next();
     }
