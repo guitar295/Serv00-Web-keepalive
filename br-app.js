@@ -3,7 +3,6 @@ const express = require("express");
 const { exec } = require("child_process");
 const fs = require("fs");
 const path = require("path");
-const crypto = require('crypto');
 const app = express();
 
 const username = process.env.USER.toLowerCase(); // 获取当前用户名并转换为小写
