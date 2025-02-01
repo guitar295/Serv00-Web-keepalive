@@ -14,7 +14,7 @@ function logMessage(message) {
     logs.push(message);
     if (logs.length > 5) logs.shift();
     const logContent = logs.join("\n");
-    const logFilePath = `${process.env.HOME}/domains/${USERNAME}.serv00.net/logs/error.log`;
+    const logFilePath = `${process.env.HOME}/domains/${username}.serv00.net/logs/error.log`;
     fs.writeFileSync(logFilePath, logContent, 'utf8');
 }
 function executeCommand(command, actionName, callback) {
