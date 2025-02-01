@@ -160,35 +160,71 @@ app.get("/node", (req, res) => {
             res.type("html").send(`<pre>无法读取文件: ${err.message}</pre>`);
             return;
         }
+
+        const cleanedData = data
+            .replace(/(vmess:\/\/|hysteria2:\/\/|proxyip:\/\/)/g, '\n$1')
+            .trim();
+
         const vmessPattern = /vmess:\/\/[^\n]+/g;
         const hysteriaPattern = /hysteria2:\/\/[^\n]+/g;
         const proxyipPattern = /proxyip:\/\/[^\n]+/g;
-        const vmessConfigs = data.match(vmessPattern) || [];
-        const hysteriaConfigs = data.match(hysteriaPattern) || [];
-        const proxyipConfigs = data.match(proxyipPattern) || [];
+        const vmessConfigs = cleanedData.match(vmessPattern) || [];
+        const hysteriaConfigs = cleanedData.match(hysteriaPattern) || [];
+        const proxyipConfigs = cleanedData.match(proxyipPattern) || [];
         const allConfigs = [...vmessConfigs, ...hysteriaConfigs, ...proxyipConfigs];
+
         let htmlContent = `
             <html>
             <head>
                 <style>
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        font-family: Arial, sans-serif;
+                        background-color: #f4f4f4;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100vh;
+                    }
+                    .content-container {
+                        width: 90%;
+                        max-width: 600px;
+                        background-color: #fff;
+                        padding: 20px;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                        text-align: left;
+                        box-sizing: border-box;
+                    }
+                    h3 {
+                        font-size: 20px;
+                        margin-bottom: 10px;
+                    }
                     .config-box {
-                        max-height: 400px;
+                        max-height: 60vh;
                         overflow-y: auto;
                         border: 1px solid #ccc;
                         padding: 10px;
-                        background-color: #f4f4f4;
-                    }
-                    #configContent {
+                        background-color: #f9f9f9;
+                        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+                        border-radius: 5px;
                         white-space: pre-wrap;
-                        text-align: left;
+                        word-break: break-word;
                     }
                     .copy-btn {
-                        padding: 5px 10px;
-                        cursor: pointer;
+                        display: block;
+                        width: 100%;
+                        padding: 10px;
+                        font-size: 16px;
                         background-color: #007bff;
                         color: white;
                         border: none;
                         border-radius: 5px;
+                        cursor: pointer;
+                        text-align: center;
+                        margin-top: 20px;
+                        transition: background-color 0.3s;
                     }
                     .copy-btn:hover {
                         background-color: #0056b3;
@@ -196,29 +232,43 @@ app.get("/node", (req, res) => {
                 </style>
             </head>
             <body>
-                <div>
+                <div class="content-container">
                     <h3>节点信息</h3>
                     <div class="config-box" id="configBox">
-                        <pre id="configContent">
         `;
+
         allConfigs.forEach((config) => {
-            htmlContent += `${config}\n`;
+            htmlContent += `<div>${config.trim()}</div>`; // 去掉首尾空格
         });
+
         htmlContent += `
-                        </pre>
                     </div>
-                    <button class="copy-btn" onclick="copyToClipboard('#configContent')">一键复制</button>
+                    <button class="copy-btn" onclick="copyToClipboard('#configBox')">一键复制</button>
                 </div>
+
                 <script>
                     function copyToClipboard(id) {
-                        var text = document.querySelector(id).textContent;
-                        var textarea = document.createElement('textarea');
-                        textarea.value = text;
+                        const element = document.querySelector(id);
+                        let text = "";
+
+                        // 遍历每一行内容，去除首尾空格并拼接
+                        Array.from(element.children).forEach(child => {
+                            text += child.textContent.trim() + "\\n";
+                        });
+
+                        // 创建临时文本框进行复制
+                        const textarea = document.createElement('textarea');
+                        textarea.value = text.trim(); // 去除整体的多余空行
                         document.body.appendChild(textarea);
                         textarea.select();
-                        document.execCommand('copy');
+                        const success = document.execCommand('copy');
                         document.body.removeChild(textarea);
-                        alert('已复制到剪贴板！');
+
+                        if (success) {
+                            alert('已复制到剪贴板！');
+                        } else {
+                            alert('复制失败，请手动复制！');
+                        }
                     }
                 </script>
             </body>
@@ -229,7 +279,7 @@ app.get("/node", (req, res) => {
 });
 
 app.get("/log", (req, res) => {
-    const command = "ps -A";
+    const command = "ps -A"; 
     exec(command, (err, stdout, stderr) => {
         if (err) {
             return res.type("html").send(`
@@ -237,26 +287,79 @@ app.get("/log", (req, res) => {
                 <pre><b>进程详情:</b>\n执行错误: ${err.message}</pre>
             `);
         }
-        const processOutput = stdout.trim();
+        const processOutput = stdout.trim(); 
         const latestLog = logs[logs.length - 1] || "暂无日志";
         res.type("html").send(`
             <html>
                 <head>
                     <style>
-                        .scrollable {
-                            max-height: 300px;
-                            overflow-y: auto;
+                        body {
+                            font-family: Arial, sans-serif;
+                            margin: 0;
+                            padding: 0;
+                            background-color: #f4f4f4;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            height: 100vh;
+                        }
+
+                        .container {
+                            width: 90%;
+                            max-width: 1000px;
+                            background-color: #fff;
+                            padding: 20px;
+                            border-radius: 8px;
+                            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                            text-align: left;
+                            box-sizing: border-box;
+                        }
+
+                        /* 最近日志部分 */
+                        pre.log {
+                            margin-bottom: 20px;
+                            white-space: pre-wrap;  /* 自动换行 */
+                            word-wrap: break-word;  /* 防止超出容器宽度 */
+                            overflow-wrap: break-word; /* 确保长单词不会溢出 */
                             border: 1px solid #ccc;
                             padding: 10px;
-                            margin-top: 20px;
                             background-color: #f9f9f9;
+                            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                            border-radius: 5px;
+                        }
+
+                        /* 进程详情部分 */
+                        .scrollable {
+                            max-height: 60vh; /* 设置进程详情框高 */
+                            overflow-x: auto; /* 横向滚动 */
+                            white-space: nowrap; /* 禁止换行 */
+                            border: 1px solid #ccc;
+                            padding: 10px;
+                            background-color: #f9f9f9;
+                            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                            border-radius: 5px;
+                        }
+
+                        pre {
+                            margin: 0; /* 防止 pre 标签内的内容左右溢出 */
+                        }
+
+                        @media (max-width: 600px) {
+                            .container {
+                                width: 95%;
+                            }
+                            .scrollable {
+                                max-height: 50vh; /* 手机屏幕时进程详情高度调整为50% */
+                            }
                         }
                     </style>
                 </head>
                 <body>
-                    <pre><b>最近日志:</b>\n${latestLog}</pre>
-                    <div class="scrollable">
-                        <pre><b>进程详情:</b>\n${processOutput}</pre>
+                    <div class="container">
+                        <pre class="log"><b>最近日志:</b>\n${latestLog}</pre>
+                        <div class="scrollable">
+                            <pre><b>进程详情:</b>\n${processOutput}</pre>
+                        </div>
                     </div>
                 </body>
             </html>
