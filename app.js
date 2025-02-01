@@ -40,16 +40,6 @@ function runShellCommand() {
     executeCommand(command, "start.sh");
 }
 
-function executeHy2ipScript(logMessages, callback) {
-    const username = process.env.USER.toLowerCase(); // 获取当前用户名并转换为小写
-    const command = `cd ${process.env.HOME}/domains/${username}.serv00.net/public_nodejs/ && bash hy2ip.sh`;
-
-    // 执行脚本并捕获输出
-    exec(command, (error, stdout, stderr) => {
-        callback(error, stdout, stderr);
-    });
-}
-
 function KeepAlive() {
     const command = `cd ${process.env.HOME}/serv00-play/ && bash keepalive.sh`;
     executeCommand(command, "keepalive.sh");
@@ -65,391 +55,103 @@ app.get("/info", (req, res) => {
         <head>
             <style>
                 body {
-                    margin: 0;
-                    font-family: Arial, sans-serif;
-                    background-color: #f4f4f4;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     height: 100vh;
+                    margin: 0;
+                    font-family: Arial, sans-serif;
+                    text-align: center;
                 }
                 .content-container {
-                    width: 100%;
-                    max-width: 600px; /* 最大宽度为600px */
-                    background-color: #fff;
-                    padding: 20px;
-                    border-radius: 8px;
-                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-                    box-sizing: border-box;
-                    text-align: left; /* 保持文字左对齐 */
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    text-align: center;
+                    max-width: 600px;
                 }
                 .dynamic-text {
-                    font-size: 24px;
+                    font-size: 30px;
                     font-weight: bold;
-                    margin-bottom: 20px;
-                    line-height: 1.5;
-                    text-align: center; /* 两行文本居中 */
+                    white-space: nowrap;
+                    display: inline-block;
                 }
                 @keyframes growShrink {
                     0% {
                         transform: scale(1);
                     }
-                    50% {
-                        transform: scale(1.2);
+                    25% {
+                        transform: scale(1.5);
                     }
-                    100% {
+                    50% {
                         transform: scale(1);
                     }
                 }
+
                 .dynamic-text span {
                     display: inline-block;
-                    animation: growShrink 1.2s infinite;
+                    animation: growShrink 1s infinite;
                     animation-delay: calc(0.1s * var(--char-index));
                 }
                 .button-container {
                     margin-top: 20px;
-                    display: flex;
-                    flex-wrap: wrap; /* 适配小屏，按钮会换行 */
-                    gap: 10px;
                 }
                 button {
-                    flex: 1;
-                    min-width: 100px;
-                    padding: 10px 15px;
+                    padding: 10px 20px;
                     font-size: 16px;
+                    cursor: pointer;
                     background-color: #007bff;
                     color: white;
                     border: none;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    transition: background-color 0.3s ease;
+                    border-radius: 5px;
+                    margin: 10px 20px;
                 }
                 button:hover {
                     background-color: #0056b3;
-                }
-                @media (max-width: 600px) {
-                    .dynamic-text {
-                        font-size: 20px;
-                    }
-                    button {
-                        font-size: 14px;
-                    }
                 }
             </style>
         </head>
         <body>
             <div class="content-container">
                 <div class="dynamic-text">
-                    ${"SingBox 已复活".split("").map((char, index) => 
-                        `<span style="--char-index: ${index};">${char}</span>`).join("")}
+                    <span style="--char-index: 0;">S</span>
+                    <span style="--char-index: 1;">i</span>
+                    <span style="--char-index: 2;">n</span>
+                    <span style="--char-index: 3;">g</span>
+                    <span style="--char-index: 4;">B</span>
+                    <span style="--char-index: 5;">o</span>
+                    <span style="--char-index: 6;">x</span>
+                    <span style="--char-index: 7;"> </span>
+                    <span style="--char-index: 8;">已</span>
+                    <span style="--char-index: 9;">复</span>
+                    <span style="--char-index: 10;">活</span>
                 </div>
-                <div class="dynamic-text">
-                    ${"HtmlOnLive 守护中".split("").map((char, index) => 
-                        `<span style="--char-index: ${index + 10};">${char}</span>`).join("")}
+                <div class="dynamic-text" style="margin-top: 20px;">
+                    <span style="--char-index: 11;">H</span>
+                    <span style="--char-index: 12;">t</span>
+                    <span style="--char-index: 13;">m</span>
+                    <span style="--char-index: 14;">l</span>
+                    <span style="--char-index: 15;">O</span>
+                    <span style="--char-index: 16;">n</span>
+                    <span style="--char-index: 17;">L</span>
+                    <span style="--char-index: 18;">i</span>
+                    <span style="--char-index: 19;">v</span>
+                    <span style="--char-index: 20;">e</span>
+                    <span style="--char-index: 21;"> </span>
+                    <span style="--char-index: 22;">守</span>
+                    <span style="--char-index: 23;">护</span>
+                    <span style="--char-index: 24;">中</span>
                 </div>
                 <div class="button-container">
-                    <button onclick="window.location.href='/hy2ip'">换HY2_IP</button>
                     <button onclick="window.location.href='/node'">节点信息</button>
-                    <button onclick="window.location.href='/log'">查看日志</button>
+                    <button onclick="window.location.href='/log'">实时日志</button>
                 </div>
             </div>
         </body>
         </html>
     `);
 });
-
-// 中间件：解析请求体
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
-app.get("/hy2ip", (req, res) => {
-    res.send(`
-        <html>
-            <head>
-                <title>HY2_IP 更新</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        margin: 0;
-                        padding: 0;
-                        background-color: #f4f4f4;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        height: 100vh;
-                        width: 100vw;
-                        overflow: hidden;
-                    }
-                    .container {
-                        width: 95%;
-                        max-width: 600px;
-                        background-color: #fff;
-                        padding: 20px;
-                        border-radius: 8px;
-                        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-                        box-sizing: border-box;
-                        text-align: left;
-                    }
-                    h1 {
-                        font-size: 24px;
-                        margin-bottom: 15px;
-                    }
-                    p {
-                        font-size: 16px;
-                        margin-bottom: 20px;
-                        color: #555;
-                        line-height: 1.5;
-                    }
-                    input[type="text"] {
-                        width: 100%;
-                        padding: 12px;
-                        font-size: 16px;
-                        border: 1px solid #ccc;
-                        border-radius: 4px;
-                        box-sizing: border-box;
-                        margin-bottom: 15px;
-                        text-align: center;
-                        transition: 0.3s;
-                    }
-                    input[type="text"]:focus {
-                        border-color: #007bff;
-                        outline: none;
-                        box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
-                    }
-                    button {
-                        width: 100%;
-                        padding: 12px;
-                        font-size: 18px;
-                        background-color: #007bff;
-                        color: white;
-                        border: none;
-                        border-radius: 4px;
-                        cursor: pointer;
-                        transition: 0.3s;
-                    }
-                    button:hover {
-                        background-color: #0056b3;
-                        transform: scale(1.05);
-                    }
-                    @media (max-width: 600px) {
-                        .container {
-                            padding: 15px;
-                        }
-                        h1 {
-                            font-size: 20px;
-                        }
-                        p {
-                            font-size: 14px;
-                        }
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>HY2_IP 更新</h1>
-                    <p>请输入 <b>更新</b> 以确认执行 IP 更新。</p>
-                    <form action="/hy2ip/execute" method="POST">
-                        <input type="text" name="confirmation" placeholder="更新">
-                        <button type="submit">提交</button>
-                    </form>
-                    <p>⚠️ 不同 IP 更新后原线路会失效，请复制新信息使用。</p>
-                </div>
-            </body>
-        </html>
-    `);
-});
-
-app.post("/hy2ip/execute", (req, res) => {
-    const confirmation = req.body.confirmation?.trim();
-
-    if (confirmation !== "更新") {
-        return res.send(`
-            <html>
-                <head>
-                    <meta name="viewport" content="width=device-width, initial-scale=1">
-                    <title>HY2_IP 更新失败</title>
-                    <style>
-                        body {
-                            font-family: Arial, sans-serif;
-                            background-color: #f4f4f4;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            height: 100vh;
-                            margin: 0;
-                            padding: 0 10px;
-                        }
-                        .container {
-                            width: 90%;
-                            max-width: 600px;
-                            background-color: #fff;
-                            padding: 20px;
-                            border-radius: 8px;
-                            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-                            text-align: left;
-                        }
-                        h1 {
-                            font-size: 22px;
-                            margin-bottom: 15px;
-                        }
-                        p {
-                            font-size: 16px;
-                            color: red;
-                        }
-                        a {
-                            color: #007bff;
-                            text-decoration: none;
-                        }
-                        a:hover {
-                            text-decoration: underline;
-                        }
-                        @media (max-width: 600px) {
-                            .container {
-                                padding: 15px;
-                            }
-                            h1 {
-                                font-size: 20px;
-                            }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <h1>更新失败</h1>
-                        <p>输入错误！请返回并输入“更新”以确认。</p>
-                        <a href="/hy2ip">返回</a>
-                    </div>
-                </body>
-            </html>
-        `);
-    }
-
-    try {
-    let logMessages = [];
-    function addLog(message) {
-        if (logMessages.length >= 5) {
-            logMessages.shift(); 
-        }
-        logMessages.push(message);
-    }
-
-    executeHy2ipScript(logMessages, (error, stdout, stderr) => {
-        let updatedIp = "";
-
-        if (stdout) {
-            let outputMessages = stdout.split("\n");
-            outputMessages.forEach(line => {
-                if (line.includes("SingBox 配置文件成功更新IP为")) {
-                    updatedIp = line.split("SingBox 配置文件成功更新IP为")[1].trim();
-                }
-                if (line.includes("Config 配置文件成功更新IP为")) {
-                    updatedIp = line.split("Config 配置文件成功更新IP为")[1].trim();
-                }
-            });
-
-            // 去掉 ANSI 颜色码
-            if (updatedIp) {
-                updatedIp = updatedIp.replace(/\x1B\[[0-9;]*m/g, "");
-            }
-
-            if (updatedIp && updatedIp !== "未找到可用的 IP！") {
-                addLog("命令执行成功");
-                addLog(`SingBox 配置文件成功更新IP为 ${updatedIp}`);
-                addLog(`Config 配置文件成功更新IP为 ${updatedIp}`);
-                addLog("sing-box 已重启");
-                res.send(generateHtml("HY2_IP 更新", updatedIp, logMessages));
-            } else {
-                addLog("命令执行成功");
-                addLog("没有找到有效 IP");
-                res.send(generateHtml("HY2_IP 更新", "无", logMessages, true));
-            }
-        }
-    });
-} catch (error) {
-    let logMessages = ["命令执行成功", "没有找到有效 IP"];
-    res.send(generateHtml("HY2_IP 更新", "无", logMessages, true));
-}
-});
-
-// 生成 HTML 页面
-function generateHtml(title, ip, logs, isError = false) {
-    let ipColor = isError ? "red" : "black";
-    let htmlLogs = logs.map(msg => `<p>${msg}</p>`).join("");
-
-    return `
-        <html>
-            <head>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <title>${title}</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        background-color: #f4f4f4;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        height: 100vh;
-                        margin: 0;
-                        padding: 0 10px;
-                    }
-                    .container {
-                        width: 90%;
-                        max-width: 800px;
-                        background-color: #fff;
-                        padding: 20px;
-                        border-radius: 8px;
-                        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-                        text-align: left;
-                    }
-                    h1 {
-                        font-size: 24px;
-                        margin-bottom: 20px;
-                        text-align: left;
-                    }
-                    p {
-                        font-size: 16px;
-                    }
-                    .scrollable {
-                        max-height: 300px;
-                        overflow-y: auto;
-                        border: 1px solid #ccc;
-                        padding: 10px;
-                        background-color: #f9f9f9;
-                        border-radius: 4px;
-                    }
-                    .ip {
-                        font-weight: bold;
-                        color: ${ipColor};
-                    }
-                    @media (max-width: 600px) {
-                        .container {
-                            padding: 15px;
-                        }
-                        h1 {
-                            font-size: 22px;
-                        }
-                        .scrollable {
-                            max-height: 200px;
-                        }
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>${title}</h1>
-                    <p><strong>有效 IP：</strong> <span class="ip">${ip}</span></p>
-                    <div>
-                        <h2>日志:</h2>
-                        <div class="scrollable">
-                            ${htmlLogs}
-                        </div>
-                    </div>
-                </div>
-            </body>
-        </html>
-    `;
-}
 
 app.get("/node", (req, res) => {
     const filePath = path.join(process.env.HOME, "serv00-play/singbox/list");
@@ -666,14 +368,16 @@ app.get("/log", (req, res) => {
 });
 
 app.use((req, res, next) => {
-    const validPaths = ["/info", "/hy2ip", "/node", "/log"];
+    const validPaths = ["/info", "/node", "/log"];
     if (validPaths.includes(req.path)) {
         return next();
     }
     res.status(404).send("页面未找到");
 });
+
 app.listen(3000, () => {
     const timestamp = new Date().toLocaleString();
     const startMsg = `${timestamp} 服务器已启动，监听端口 3000`;
     logMessage(startMsg);
+    console.log(startMsg);
 });
