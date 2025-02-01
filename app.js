@@ -1,20 +1,20 @@
 require('dotenv').config();
 const express = require("express");
-const { exec, execSync } = require("child_process");
+const { exec } = require("child_process");
 const fs = require("fs");
 const path = require("path");
+const crypto = require('crypto');
 const app = express();
 
-const USERNAME = execSync('whoami').toString().trim();
+const username = process.env.USER.toLowerCase(); // 获取当前用户名并转换为小写
 
 app.use(express.json());
 let logs = [];
-
 function logMessage(message) {
     logs.push(message);
     if (logs.length > 5) logs.shift();
     const logContent = logs.join("\n");
-    const logFilePath = `${process.env.HOME}/domains/${USERNAME}.serv00.net/logs/error.log`;
+    const logFilePath = `${process.env.HOME}/domains/${username}.serv00.net/logs/error.log`;
     fs.writeFileSync(logFilePath, logContent, 'utf8');
 }
 
@@ -41,7 +41,6 @@ function runShellCommand() {
 }
 
 function executeHy2ipScript(logMessages, callback) {
-    const username = process.env.USER.toLowerCase(); // 获取当前用户名并转换为小写
     const command = `cd ${process.env.HOME}/domains/${username}.serv00.net/public_nodejs/ && bash hy2ip.sh`;
 
     // 执行脚本并捕获输出
@@ -359,13 +358,9 @@ app.post("/hy2ip/execute", (req, res) => {
 
     try {
     let logMessages = [];
-
     function addLog(message) {
         if (logMessages.length >= 10) {
             logMessages.shift(); 
-          const logContent = logMessages.join("\n");
-          const logFilePath = `${process.env.HOME}/domains/${USERNAME}.serv00.net/logs/error.log`;
-        fs.writeFileSync(logFilePath, logContent, 'utf8');       
         }
         logMessages.push(message);
     }
@@ -721,7 +716,7 @@ app.get("/log", (req, res) => {
 });
 
 app.use((req, res, next) => {
-    const validPaths = ["/info", "/hy2ip", "/node", "/log"];
+    const validPaths = ["/info", "/hy2ip", "/node", "/log" ];
     if (validPaths.includes(req.path)) {
         return next();
     }
@@ -731,5 +726,4 @@ app.listen(3000, () => {
     const timestamp = new Date().toLocaleString();
     const startMsg = `${timestamp} 服务器已启动，监听端口 3000`;
     logMessage(startMsg);
-    console.log(startMsg);
 });
