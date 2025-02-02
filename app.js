@@ -354,7 +354,7 @@ app.post("/hy2ip/execute", (req, res) => {
                     logMessages.push("命令执行成功");
                     logMessages.push("没有找到有效 IP");
                 }
-                while (logMessages.length > 5) {
+                while (logMessages.length > 10) {
                     logMessages.shift(); 
                 }
                 res.send(generateHtml("HY2_IP 更新", updatedIp || "无", logMessages));
