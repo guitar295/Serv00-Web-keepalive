@@ -345,18 +345,19 @@ app.post("/hy2ip/execute", (req, res) => {
                 if (updatedIp) {
                     updatedIp = updatedIp.replace(/\x1B\[[0-9;]*m/g, "");
                 }
-
                 if (updatedIp && updatedIp !== "未找到可用的 IP！") {
                     logMessages.push("命令执行成功");
                     logMessages.push(`SingBox 配置文件成功更新IP为 ${updatedIp}`);
                     logMessages.push(`Config 配置文件成功更新IP为 ${updatedIp}`);
                     logMessages.push("sing-box 已重启");
-                    res.send(generateHtml("HY2_IP 更新", updatedIp, logMessages));
                 } else {
                     logMessages.push("命令执行成功");
                     logMessages.push("没有找到有效 IP");
-                    res.send(generateHtml("HY2_IP 更新", "无", logMessages, true));
                 }
+                while (logMessages.length > 5) {
+                    logMessages.shift(); 
+                }
+                res.send(generateHtml("HY2_IP 更新", updatedIp || "无", logMessages));
             }
         });
     } catch (error) {
