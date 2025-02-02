@@ -6,12 +6,6 @@ const path = require("path");
 const app = express();
 
 const username = process.env.USER.toLowerCase(); // 获取当前用户名并转换为小写
-const DOMAIN_DIR = path.join(process.env.HOME, "domains", `${username}.serv00.net`, "public_nodejs");
-// 定义 OTA 脚本路径
-const otaScriptPath = path.join(__dirname, 'ota.sh');
-
-// 允许静态文件访问
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(express.json());
 let logs = [];
@@ -182,7 +176,6 @@ app.get("/info", (req, res) => {
                     <button onclick="window.location.href='/hy2ip'">换HY2_IP</button>
                     <button onclick="window.location.href='/node'">节点信息</button>
                     <button onclick="window.location.href='/log'">查看日志</button>
-                    <button onclick="window.location.href='/ota'">检查更新</button>
                 </div>
             </div>
         </body>
