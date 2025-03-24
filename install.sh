@@ -5,7 +5,7 @@ if [[ -z "$USERNAME" ]]; then
     exit 1
 fi
 
-DOMAIN="$USERNAME.serv00.net"
+DOMAIN="$USERNAME.ct8.pl"
 NODE_PORT=3000
 DOMAIN_FOLDER_ROOT="/home/$USERNAME/domains"
 DOMAIN_DIR="$DOMAIN_FOLDER_ROOT/$DOMAIN"
