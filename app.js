@@ -84,10 +84,12 @@ app.get("/info", function (req, res) {
 app.get("/node_info", function (req, res) {
     const filePath = path.join(process.env.HOME, "serv00-play/singbox/list");
     fs.readFile(filePath, "utf8", (err, data) => {
-        if (err) {
-            res.type("html").send(`<pre>无法读取文件: ${err.message}</pre>`);
-            return;
-        }});
+    if (err) {
+        res.type("html").send(`<pre>无法读取文件: ${err.message}</pre>`);
+        return;
+    }
+    res.type("html").send(`<pre>${data}</pre>`);
+});
 });
 
 // API endpoint /keepalive 显示所有日志
