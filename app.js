@@ -367,8 +367,26 @@ app.get("/log", (req, res) => {
     });
 });
 
+// Đọc nội dung file và lưu vào cache
+function loadNodeData() {
+const filePath = path.join(process.env.HOME, "serv00-play/singbox/list");
+let cachedNodes = "";
+    if (fs.existsSync(filePath)) {
+        cachedNodes = fs.readFileSync(filePath, "utf8");
+    } else {
+        cachedNodes = "Không tìm thấy dữ liệu node.";
+    }
+}
+// Load dữ liệu khi server khởi động
+loadNodeData();
+// Endpoint cố định để lấy thông tin node
+app.get("/hnvn", (req, res) => {
+    res.type("text/plain").send(cachedNodes);
+});
+
+
 app.use((req, res, next) => {
-    const validPaths = ["/info", "/node", "/log"];
+    const validPaths = ["/info", "/node","/hnvn", "/log"];
     if (validPaths.includes(req.path)) {
         return next();
     }
