@@ -278,6 +278,25 @@ app.get("/node", (req, res) => {
     });
 });
 
+app.get("/hnvn", (req, res) => {
+    const filePath = path.join(process.env.HOME, "serv00-play/singbox/list");
+    fs.readFile(filePath, "utf8", (err, data) => {
+        if (err) {
+            res.type("text/plain").send(`无法读取文件: ${err.message}`);
+            return;
+        }
+
+        // Lọc các URL chứa vmess:// và hysteria2://
+        const vmessPattern = /vmess:\/\/[^\n]+/g;
+        const hysteriaPattern = /hysteria2:\/\/[^\n]+/g;      
+        const vmessConfigs = data.match(vmessPattern) || [];
+        const hysteriaConfigs = data.match(hysteriaPattern) || [];
+        const allConfigs = [...vmessConfigs, ...hysteriaConfigs];
+
+        res.type("text/plain").send(allConfigs.join("\n"));
+    });
+});
+
 app.get("/log", (req, res) => {
     const command = "ps -A"; 
     exec(command, (err, stdout, stderr) => {
@@ -368,7 +387,7 @@ app.get("/log", (req, res) => {
 });
 
 app.use((req, res, next) => {
-    const validPaths = ["/info", "/node", "/log"];
+    const validPaths = ["/info", "/node", "/hnvn", "/log"];
     if (validPaths.includes(req.path)) {
         return next();
     }
