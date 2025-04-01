@@ -82,8 +82,12 @@ app.get("/info", function (req, res) {
 
 // API endpoint /node_info 显示 start.sh 的日志
 app.get("/node_info", function (req, res) {
-    // 显示最近一次 start.sh 执行日志
-    res.type("html").send("<pre>" + latestStartLog + "</pre>");
+    const filePath = path.join(process.env.HOME, "serv00-play/singbox/list");
+    fs.readFile(filePath, "utf8", (err, data) => {
+        if (err) {
+            res.type("html").send(`<pre>无法读取文件: ${err.message}</pre>`);
+            return;
+        }});
 });
 
 // API endpoint /keepalive 显示所有日志
